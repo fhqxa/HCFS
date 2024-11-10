@@ -1,0 +1,56 @@
+%% 读取数据
+function [clu,cluLabel] = ClusterTreeguo(dataset, tree)
+load DDTrain.mat %%aaa为变量名
+[m,n] = size(data_array);
+len = length(unique(data_array(:,end)));
+for i = 1:len
+    fin = find(data_array(:,end) == i);
+    data_cell{i} = data_array(fin,1:end-1);
+    su(:,i) = sum(data_cell{i});
+    data_cellLable{i} = data_array(fin,end);
+end
+pre_data = su';
+% for k = 1:len
+%     x = data_cell{k}';
+%     n = numel(x);
+%     x = reshape(x,1,n); 
+%     pre_data = [pre_data;x]
+% end
+%% 数据归一化
+% pre_data = data_cell';
+[rn,cn] = size(pre_data);
+step1_data = zeros(rn,cn);
+   for k=1:cn
+       %基于均值方差的离群点数据归一化
+       xm=mean(pre_data(:,k));
+       xs=std(pre_data(:,k));
+       for j=1:rn
+           if (pre_data(j,k))>xm+2*xs
+               step1_data(j,k)=1;
+           elseif (pre_data(j,k))<xm-2*xs
+               step1_data(j,k)=0;
+           else
+               step1_data(j,k)=(pre_data(j,k)-(xm-2*xs))/(4*xs);
+           end
+       end
+   end
+%    xlswrite('norm_data.xlsx',step1_data,i);
+%% 层次聚类
+numClust = 4;
+dist_h = 'spearman';
+link = 'weighted';
+hidx = clusterdata(step1_data,'maxclust',numClust,'distance',dist_h,'linkage',link);
+for j = 1:numClust
+    data = data_cell(find(hidx == j));
+    label = data_cellLable(find(hidx == j));
+    clu{len+j} = [];
+    cluLabel{len+j} =[];
+    for t = 1:length(data)
+     clu{len+j}  = [clu{len+j};cell2mat(data(t))];
+     cluLabel{len+j}  = [cluLabel{len+j};cell2mat(label(t))];
+    end
+end
+clu{len+numClust+1} = data_array(:,1:end-1);
+cluLabel{len+numClust+1} = data_array(:,end);
+end
+
