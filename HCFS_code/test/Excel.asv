@@ -1,0 +1,8 @@
+clear
+clc
+load DDTrain.mat %%aaa为变量名
+
+[m, n] = size(data_array);            
+data_cell = mat2cell(data_array, ones(m,1), ones(n,1));    % 将data切割成m*n的cell矩阵                      % 添加变量名称
+result = [data_cell];                                            % 将变量名称和数值组集到result
+s = xlswrite('DDTrain.xls', result); 
